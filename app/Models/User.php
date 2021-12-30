@@ -23,7 +23,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array
      */
     protected $fillable = [
-        'id','uuid','name', 'email','telegram_id', 'password','email_verified_at',
+        'id','uuid','name', 'email','telegram_id','country', 'password','email_verified_at','referral_code',
     ];
 
     /**

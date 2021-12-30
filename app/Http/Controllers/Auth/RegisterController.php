@@ -7,11 +7,12 @@ use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Auth\Events\Registered;
 use App\Models\User;
+use App\Models\Referral;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-
+use Cookie;
 
 class RegisterController extends Controller
 {
@@ -104,7 +105,11 @@ class RegisterController extends Controller
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'telegram_id' => ['required','string','unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'country' => ['required'],
+
+
         ]);
     }
 
@@ -120,17 +125,38 @@ class RegisterController extends Controller
             'uuid' => Str::uuid()->toString(),
             'name' => $data['name'],
             'email' => $data['email'],
+            'telegram_id' => $data['telegram_id'],
+            'country' => $data['country'],
             'password' => Hash::make($data['password']),
+            'referral_code' => strtoupper(uniqid('Fiti5',false)),
         ]);
 
         $user->assignRole('user');
 
-       
+
+        /////////////////// Referral /////////////////////
+        
+        if (isset($data['s_referral_code'])){
+        $refer_by = $data['s_referral_code'];
+
+        if(!empty($refer_by)){
+
+            $user_referral = User::where('referral_code','=',$refer_by)->first();
+
+            if(!empty($user_referral)){
+
+                $refferal = new Referral;
+                $refferal->refer_by = $user_referral->id;
+                $refferal->user_id =$user->id;
+                $refferal->save();
+                
 
 
+            }
 
-
-
+        }
+    
+    }
 
 
         return $user;
