@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\ProfileController;
+use App\Http\Controllers\Backend\KycController;
 use App\Http\Controllers\Backend\PostController;
 use App\Http\Controllers\Backend\Admin\UserController;
 use App\Http\Controllers\Backend\Admin\RoleController;
@@ -61,9 +62,13 @@ Route::group(['middleware' => ['auth','verified']], function() {
     Route::post('post',[PostController::class, 'post'])->name('posts');
 
 
+
     Route::get('/dashboard',[DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/buy-token',[DashboardController::class, 'buy_token'])->name('buy-token');
+
+    Route::get('kyc',[KycController::class, 'index'])->name('kyc');
+
 
     Route::resource('roles', RoleController::class);
     Route::resource('user', UserController::class);

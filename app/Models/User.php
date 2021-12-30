@@ -11,7 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use App\Models\Profile;
 use App\Models\Post;
-
+use App\Models\Kyc;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -52,6 +52,15 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function posts(){
         return $this->hasMany(Post::class);
+      }
+
+
+      public function kyc_info()
+
+      {
+  
+          return $this->belongsTo('App\Models\Kyc', 'id', 'user_id')->orderBy('created_at', 'DESC');
+  
       }
 
    
