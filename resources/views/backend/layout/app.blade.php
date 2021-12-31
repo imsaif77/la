@@ -11,12 +11,15 @@
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/favicon.png')}}">
 	<link rel="stylesheet" href="{{ asset('vendor/chartist/css/chartist.min.css')}}">
+    
+
     <link href="{{ asset('vendor/bootstrap-select/dist/css/bootstrap-select.min.css')}}" rel="stylesheet">
     <link href="{{ asset('css/style.css')}}" rel="stylesheet">
 	<link href="../../cdn.lineicons.com/2.0/LineIcons.css" rel="stylesheet">
 	<link href="{{ asset('vendor/owl-carousel/owl.carousel.css')}}" rel="stylesheet">
 
     <link href="{{ asset('vendor/lightgallery/css/lightgallery.min.css')}}" rel="stylesheet">
+
 
 
     <!--- Datatable ---->
@@ -135,6 +138,9 @@
 
 	<script src="//cdn.bootcss.com/toastr.js/latest/js/toastr.min.js"></script>
 
+{{-- 
+    <script src="{{asset('vendor/select2/js/select2.full.min.js')}}"></script>
+    <script src="{{asset('js/plugins-init/select2-init.js')}}"></script> --}}
 
 	<script>
   @if(Session::has('message'))

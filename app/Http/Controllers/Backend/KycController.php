@@ -16,6 +16,8 @@ class KycController extends Controller
 
     public function kyc_application()
     {
-        return view('backend.kyc.kyc');
+        $title = KYC::documents();
+
+        return view('backend.kyc.kyc_application',compact('title'));
     }
 }

@@ -68,6 +68,8 @@ Route::group(['middleware' => ['auth','verified']], function() {
     Route::get('/buy-token',[DashboardController::class, 'buy_token'])->name('buy-token');
 
     Route::get('kyc',[KycController::class, 'index'])->name('kyc');
+    Route::get('kyc-application',[KycController::class, 'kyc_application'])->name('kyc-application');
+
 
 
     Route::resource('roles', RoleController::class);

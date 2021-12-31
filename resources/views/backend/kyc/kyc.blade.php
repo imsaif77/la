@@ -63,7 +63,7 @@
                         <p>Some countries and regions will not able to pass KYC process and therefore are restricted from token sale.</p>
                     </div>
 
-                    <a href="#" class="btn btn-primary">Click here to complete your KYC</a>
+                    <a href="{{ route('kyc-application') }}" class="btn btn-primary">Click here to complete your KYC</a>
 
 
 
