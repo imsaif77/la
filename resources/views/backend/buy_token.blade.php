@@ -281,7 +281,7 @@
 <!-- row -->
 <div class="row">
     <div class="col-xl col-md-4">
-        <input class="pay-option-check" type="radio" id="paybtc" name="payOption" value="BTC">
+        <input class="pay-option-check" type="radio" id="paybtc" name="payOption" value="BTC" checked>
         <label class="pay-option-label w-100" for="paybtc">
             <div class="card">
                 <div class="card-body coin_sale p-4">
