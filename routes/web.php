@@ -69,7 +69,12 @@ Route::group(['middleware' => ['auth','verified']], function() {
 
     Route::get('kyc',[KycController::class, 'index'])->name('kyc');
     Route::get('kyc-application',[KycController::class, 'kyc_application'])->name('kyc-application');
+    Route::post('add-kyc-document',[KycController::class, 'add_kyc_document'])->name('add-kyc-document');
+    Route::post('kyc-application',[KycController::class, 'kycPost'])->name('kyc-application.post');
 
+    Route::get('getimage/{ID?}',[KycController::class, 'getimage'])->name('getimage');
+
+    
 
 
     Route::resource('roles', RoleController::class);

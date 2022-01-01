@@ -201,9 +201,36 @@
 
 
 
+#css_block_overlay {
+  position: fixed; /* Sit on top of the page content */
+  /*display: none;*/ /* Hidden by default */
+  width: 100%; /* Full width (cover the whole page) */
+  height: 100%; /* Full height (cover the whole page) */
+  top: 0; 
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.8); /* Black background with opacity */
+  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+  cursor: text; /* Add a pointer on hover */
+}
+#over_lay_text{
+  position: absolute;
+  top: 50%;
+  left: 65%;
+  width: 80%;
+  font-size: 25px;
+  color: white;
+  transform: translate(-50%,-50%);
+  -ms-transform: translate(-50%,-50%);
+} 
+
+
 
 </style>    
-    
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/6.0.0-beta.2/basic.css" />
+   
 @endsection
     
 @section('content')
@@ -214,6 +241,19 @@
         <div class="card">
            <div class="card-body">
 
+        @php
+            $cur_status = current_kyc_status();
+        @endphp
+            @if($cur_status==0 || $cur_status==1)
+        
+            <div id="css_block_overlay">
+            <div id="over_lay_text">You have submitted the form. Now its under the process. So, you can not edit at this moment.</div>
+            </div>
+            @endif
+
+
+            <form action="{{ route('kyc-application.post') }}" method="post" enctype="multipart/form-data" id="submit_application" name="submit_application" onSubmit="if(!return confirm('After submission of this form, you would not be able to edit this form. Please confirm before submission')){return false;}">
+             @csrf       
             <div class="form-step form-step1">
                 <div class="form-step-head card-innr">
                     <div class="step-head">
@@ -235,9 +275,14 @@
              <div class="row">
                         <div class="col-md-6">
                          <div class="input-item input-with-label">
-                    <label for="first-name" class="input-item-label">Name  <span class="text-require text-danger">*</span></label>
+                    <label for="name" class="input-item-label">Name  <span class="text-require text-danger">*</span></label>
                     <div class="input-wrap">
-                        <input required="" class="input-bordered form-control form-control" type="text" value="" id="first-name" name="first_name" aria-required="true">
+                        <input required="" class="input-bordered form-control form-control" type="text" value="{{ Auth::user()->name }}" id="name" name="name" readonly>
+                        @if ($errors->has('name'))
+                                                    <span class="invalid feedback text-danger"role="alert">
+                                                        <strong>{{ $errors->first('name') }}.</strong>
+                                                    </span>
+                                            @endif
                     </div>
                 </div>
             </div>
@@ -246,7 +291,12 @@
                 <div class="input-item input-with-label">
                     <label for="email" class="input-item-label">Email <span class="text-require text-danger">*</span></label>
                     <div class="input-wrap">
-                        <input required="" class="input-bordered form-control form-control" value="" type="text" id="email" name="email" aria-required="true">
+                        <input required="" class="input-bordered form-control form-control" value="{{ Auth::user()->email }}" type="text" id="email" name="email" >
+                        @if ($errors->has('email'))
+                                                    <span class="invalid feedback text-danger"role="alert">
+                                                        <strong>{{ $errors->first('email') }}.</strong>
+                                                    </span>
+                                            @endif
                     </div>
                 </div>
             </div>
@@ -256,7 +306,12 @@
                 <div class="input-item input-with-label">
                     <label for="phone-number" class="input-item-label">Phone Number </label>
                     <div class="input-wrap">
-                        <input class="input-bordered form-control form-control" type="text" value="" id="phone-number" name="phone">
+                        <input class="input-bordered form-control form-control" type="number" value="{{ old('phone',  isset($kyc->phone) ? $kyc->phone : null) }}" id="phone-number" name="phone">
+                        @if ($errors->has('phone'))
+                                                    <span class="invalid feedback text-danger"role="alert">
+                                                        <strong>{{ $errors->first('phone') }}.</strong>
+                                                    </span>
+                                            @endif
                     </div>
                 </div>
             </div>
@@ -264,7 +319,8 @@
                 <div class="input-item input-with-label">
                     <label for="date-of-birth" class="input-item-label">Date of Birth </label>
                     <div class="input-wrap">
-                        <input class="input-bordered form-control form-control date-picker-dob" type="text" value="" id="date-of-birth" name="dob">
+                        <input class="input-bordered form-control form-control date-picker-dob" type="date" value="{{ old('dob',  isset($kyc->dob) ? $kyc->dob : null) }}" id="datepicker" name="dob">
+                        
                     </div>
                 </div>
             </div>
@@ -279,6 +335,12 @@
                             <option value="female">Female</option>
                             <option value="other">Other</option>
                         </select>
+
+                        @if ($errors->has('gender'))
+                                                    <span class="invalid feedback text-danger"role="alert">
+                                                        <strong>{{ $errors->first('gender') }}.</strong>
+                                                    </span>
+                                            @endif
                         
                     </div>
                 </div>
@@ -288,302 +350,35 @@
                 <div class="input-item input-with-label">
                     <label for="telegram" class="input-item-label">Telegram Username  </label>
                     <div class="input-wrap">
-                        <input class="input-bordered form-control form-control" type="text" value="" id="telegram" name="telegram">
+                        <input class="input-bordered form-control form-control" type="text" value="{{ Auth::user()->telegram_id }}" id="telegram" name="telegram_id">
+                        @if ($errors->has('telegram_id'))
+                                                    <span class="invalid feedback text-danger"role="alert">
+                                                        <strong>{{ $errors->first('telegram_id') }}.</strong>
+                                                    </span>
+                                            @endif
                     </div>
                      </div>
                 </div>
 
           </div>
 
-                    <h4 class="text-secondary mt-5">Your Address</h4>
+                <h3 class="text-secondary mt-5">Your Address</h3>
 
 
                     <div class="row">
-                        <div class="col-md-6">
-                <div class="input-item input-with-label">
-                    <label for="country" class="input-item-label">Country <span class="text-require text-danger">*</span></label>
-                    <div class="input-wrap">
-                        <select required="" class="select-bordered select-block select2-hidden-accessible form-control" name="country" id="country" data-dd-class="search-on" tabindex="-1" aria-hidden="true" aria-required="true">
-                            <option value="">Select Country</option>
-                                                        <option value="Afghanistan">Afghanistan</option>
-                                                        <option value="Albania">Albania</option>
-                                                        <option value="Algeria">Algeria</option>
-                                                        <option value="American Samoa">American Samoa</option>
-                                                        <option value="Andorra">Andorra</option>
-                                                        <option value="Angola">Angola</option>
-                                                        <option value="Anguilla">Anguilla</option>
-                                                        <option value="Antarctica">Antarctica</option>
-                                                        <option value="Antigua and Barbuda">Antigua and Barbuda</option>
-                                                        <option value="Argentina">Argentina</option>
-                                                        <option value="Armenia">Armenia</option>
-                                                        <option value="Aruba">Aruba</option>
-                                                        <option value="Australia">Australia</option>
-                                                        <option value="Austria">Austria</option>
-                                                        <option value="Azerbaijan">Azerbaijan</option>
-                                                        <option value="Bahamas">Bahamas</option>
-                                                        <option value="Bahrain">Bahrain</option>
-                                                        <option value="Bangladesh">Bangladesh</option>
-                                                        <option value="Barbados">Barbados</option>
-                                                        <option value="Belarus">Belarus</option>
-                                                        <option value="Belgium">Belgium</option>
-                                                        <option value="Belize">Belize</option>
-                                                        <option value="Benin">Benin</option>
-                                                        <option value="Bermuda">Bermuda</option>
-                                                        <option value="Bhutan">Bhutan</option>
-                                                        <option value="Bolivia">Bolivia</option>
-                                                        <option value="Bosnia and Herzegowina">Bosnia and Herzegowina</option>
-                                                        <option value="Botswana">Botswana</option>
-                                                        <option value="Bouvet Island">Bouvet Island</option>
-                                                        <option value="Brazil">Brazil</option>
-                                                        <option value="British Indian Ocean Territory">British Indian Ocean Territory</option>
-                                                        <option value="Brunei Darussalam">Brunei Darussalam</option>
-                                                        <option value="Bulgaria">Bulgaria</option>
-                                                        <option value="Burkina Faso">Burkina Faso</option>
-                                                        <option value="Burundi">Burundi</option>
-                                                        <option value="Cambodia">Cambodia</option>
-                                                        <option value="Cameroon">Cameroon</option>
-                                                        <option value="Canada">Canada</option>
-                                                        <option value="Cape Verde">Cape Verde</option>
-                                                        <option value="Cayman Islands">Cayman Islands</option>
-                                                        <option value="Central African Republic">Central African Republic</option>
-                                                        <option value="Chad">Chad</option>
-                                                        <option value="Chile">Chile</option>
-                                                        <option value="China">China</option>
-                                                        <option value="Christmas Island">Christmas Island</option>
-                                                        <option value="Cocos (Keeling) Islands">Cocos (Keeling) Islands</option>
-                                                        <option value="Colombia">Colombia</option>
-                                                        <option value="Comoros">Comoros</option>
-                                                        <option value="Congo">Congo</option>
-                                                        <option value="Congo, the Democratic Republic of the">Congo, the Democratic Republic of the</option>
-                                                        <option value="Cook Islands">Cook Islands</option>
-                                                        <option value="Costa Rica">Costa Rica</option>
-                                                        <option value="Cote d'Ivoire">Cote d'Ivoire</option>
-                                                        <option value="Croatia (Hrvatska)">Croatia (Hrvatska)</option>
-                                                        <option value="Cuba">Cuba</option>
-                                                        <option value="Cyprus">Cyprus</option>
-                                                        <option value="Czech Republic">Czech Republic</option>
-                                                        <option value="Denmark">Denmark</option>
-                                                        <option value="Djibouti">Djibouti</option>
-                                                        <option value="Dominica">Dominica</option>
-                                                        <option value="Dominican Republic">Dominican Republic</option>
-                                                        <option value="East Timor">East Timor</option>
-                                                        <option value="Ecuador">Ecuador</option>
-                                                        <option value="Egypt">Egypt</option>
-                                                        <option value="El Salvador">El Salvador</option>
-                                                        <option value="Equatorial Guinea">Equatorial Guinea</option>
-                                                        <option value="Eritrea">Eritrea</option>
-                                                        <option value="Estonia">Estonia</option>
-                                                        <option value="Ethiopia">Ethiopia</option>
-                                                        <option value="Falkland Islands (Malvinas)">Falkland Islands (Malvinas)</option>
-                                                        <option value="Faroe Islands">Faroe Islands</option>
-                                                        <option value="Fiji">Fiji</option>
-                                                        <option value="Finland">Finland</option>
-                                                        <option value="France">France</option>
-                                                        <option value="France Metropolitan">France Metropolitan</option>
-                                                        <option value="French Guiana">French Guiana</option>
-                                                        <option value="French Polynesia">French Polynesia</option>
-                                                        <option value="French Southern Territories">French Southern Territories</option>
-                                                        <option value="Gabon">Gabon</option>
-                                                        <option value="Gambia">Gambia</option>
-                                                        <option value="Georgia">Georgia</option>
-                                                        <option value="Germany">Germany</option>
-                                                        <option value="Ghana">Ghana</option>
-                                                        <option value="Gibraltar">Gibraltar</option>
-                                                        <option value="Greece">Greece</option>
-                                                        <option value="Greenland">Greenland</option>
-                                                        <option value="Grenada">Grenada</option>
-                                                        <option value="Guadeloupe">Guadeloupe</option>
-                                                        <option value="Guam">Guam</option>
-                                                        <option value="Guatemala">Guatemala</option>
-                                                        <option value="Guinea">Guinea</option>
-                                                        <option value="Guinea-Bissau">Guinea-Bissau</option>
-                                                        <option value="Guyana">Guyana</option>
-                                                        <option value="Haiti">Haiti</option>
-                                                        <option value="Heard and Mc Donald Islands">Heard and Mc Donald Islands</option>
-                                                        <option value="Holy See (Vatican City State)">Holy See (Vatican City State)</option>
-                                                        <option value="Honduras">Honduras</option>
-                                                        <option value="Hong Kong">Hong Kong</option>
-                                                        <option value="Hungary">Hungary</option>
-                                                        <option value="Iceland">Iceland</option>
-                                                        <option value="India">India</option>
-                                                        <option value="Indonesia">Indonesia</option>
-                                                        <option value="Iran (Islamic Republic of)">Iran (Islamic Republic of)</option>
-                                                        <option value="Iraq">Iraq</option>
-                                                        <option value="Ireland">Ireland</option>
-                                                        <option value="Israel">Israel</option>
-                                                        <option value="Italy">Italy</option>
-                                                        <option value="Jamaica">Jamaica</option>
-                                                        <option value="Japan">Japan</option>
-                                                        <option value="Jordan">Jordan</option>
-                                                        <option value="Kazakhstan">Kazakhstan</option>
-                                                        <option value="Kenya">Kenya</option>
-                                                        <option value="Kiribati">Kiribati</option>
-                                                        <option value="Korea, Democratic People's Republic of">Korea, Democratic People's Republic of</option>
-                                                        <option value="Korea, Republic of">Korea, Republic of</option>
-                                                        <option value="Kuwait">Kuwait</option>
-                                                        <option value="Kyrgyzstan">Kyrgyzstan</option>
-                                                        <option value="Lao, People's Democratic Republic">Lao, People's Democratic Republic</option>
-                                                        <option value="Latvia">Latvia</option>
-                                                        <option value="Lebanon">Lebanon</option>
-                                                        <option value="Lesotho">Lesotho</option>
-                                                        <option value="Liberia">Liberia</option>
-                                                        <option value="Libyan Arab Jamahiriya">Libyan Arab Jamahiriya</option>
-                                                        <option value="Liechtenstein">Liechtenstein</option>
-                                                        <option value="Lithuania">Lithuania</option>
-                                                        <option value="Luxembourg">Luxembourg</option>
-                                                        <option value="Macau">Macau</option>
-                                                        <option value="Macedonia, The Former Yugoslav Republic of">Macedonia, The Former Yugoslav Republic of</option>
-                                                        <option value="Madagascar">Madagascar</option>
-                                                        <option value="Malawi">Malawi</option>
-                                                        <option value="Malaysia">Malaysia</option>
-                                                        <option value="Maldives">Maldives</option>
-                                                        <option value="Mali">Mali</option>
-                                                        <option value="Malta">Malta</option>
-                                                        <option value="Marshall Islands">Marshall Islands</option>
-                                                        <option value="Martinique">Martinique</option>
-                                                        <option value="Mauritania">Mauritania</option>
-                                                        <option value="Mauritius">Mauritius</option>
-                                                        <option value="Mayotte">Mayotte</option>
-                                                        <option value="Mexico">Mexico</option>
-                                                        <option value="Micronesia, Federated States of">Micronesia, Federated States of</option>
-                                                        <option value="Moldova, Republic of">Moldova, Republic of</option>
-                                                        <option value="Monaco">Monaco</option>
-                                                        <option value="Mongolia">Mongolia</option>
-                                                        <option value="Montserrat">Montserrat</option>
-                                                        <option value="Morocco">Morocco</option>
-                                                        <option value="Mozambique">Mozambique</option>
-                                                        <option value="Myanmar">Myanmar</option>
-                                                        <option value="Namibia">Namibia</option>
-                                                        <option value="Nauru">Nauru</option>
-                                                        <option value="Nepal">Nepal</option>
-                                                        <option value="Netherlands">Netherlands</option>
-                                                        <option value="Netherlands Antilles">Netherlands Antilles</option>
-                                                        <option value="New Caledonia">New Caledonia</option>
-                                                        <option value="New Zealand">New Zealand</option>
-                                                        <option value="Nicaragua">Nicaragua</option>
-                                                        <option value="Niger">Niger</option>
-                                                        <option value="Nigeria">Nigeria</option>
-                                                        <option value="Niue">Niue</option>
-                                                        <option value="Norfolk Island">Norfolk Island</option>
-                                                        <option value="Northern Mariana Islands">Northern Mariana Islands</option>
-                                                        <option value="Norway">Norway</option>
-                                                        <option value="Oman">Oman</option>
-                                                        <option value="Pakistan">Pakistan</option>
-                                                        <option value="Palau">Palau</option>
-                                                        <option value="Panama">Panama</option>
-                                                        <option value="Papua New Guinea">Papua New Guinea</option>
-                                                        <option value="Paraguay">Paraguay</option>
-                                                        <option value="Peru">Peru</option>
-                                                        <option value="Philippines">Philippines</option>
-                                                        <option value="Pitcairn">Pitcairn</option>
-                                                        <option value="Poland">Poland</option>
-                                                        <option value="Portugal">Portugal</option>
-                                                        <option value="Puerto Rico">Puerto Rico</option>
-                                                        <option value="Qatar">Qatar</option>
-                                                        <option value="Reunion">Reunion</option>
-                                                        <option value="Romania">Romania</option>
-                                                        <option value="Russian Federation">Russian Federation</option>
-                                                        <option value="Rwanda">Rwanda</option>
-                                                        <option value="Saint Kitts and Nevis">Saint Kitts and Nevis</option>
-                                                        <option value="Saint Lucia">Saint Lucia</option>
-                                                        <option value="Saint Vincent and the Grenadines">Saint Vincent and the Grenadines</option>
-                                                        <option value="Samoa">Samoa</option>
-                                                        <option value="San Marino">San Marino</option>
-                                                        <option value="Sao Tome and Principe">Sao Tome and Principe</option>
-                                                        <option value="Saudi Arabia">Saudi Arabia</option>
-                                                        <option value="Senegal">Senegal</option>
-                                                        <option value="Seychelles">Seychelles</option>
-                                                        <option value="Sierra Leone">Sierra Leone</option>
-                                                        <option value="Singapore">Singapore</option>
-                                                        <option value="Slovakia (Slovak Republic)">Slovakia (Slovak Republic)</option>
-                                                        <option value="Slovenia">Slovenia</option>
-                                                        <option value="Solomon Islands">Solomon Islands</option>
-                                                        <option value="Somalia">Somalia</option>
-                                                        <option value="South Africa">South Africa</option>
-                                                        <option value="South Georgia and the South Sandwich Islands">South Georgia and the South Sandwich Islands</option>
-                                                        <option value="Spain">Spain</option>
-                                                        <option value="Sri Lanka">Sri Lanka</option>
-                                                        <option value="St. Helena">St. Helena</option>
-                                                        <option value="St. Pierre and Miquelon">St. Pierre and Miquelon</option>
-                                                        <option value="Sudan">Sudan</option>
-                                                        <option value="Suriname">Suriname</option>
-                                                        <option value="Svalbard and Jan Mayen Islands">Svalbard and Jan Mayen Islands</option>
-                                                        <option value="Swaziland">Swaziland</option>
-                                                        <option value="Sweden">Sweden</option>
-                                                        <option value="Switzerland">Switzerland</option>
-                                                        <option value="Syrian Arab Republic">Syrian Arab Republic</option>
-                                                        <option value="Taiwan, Province of China">Taiwan, Province of China</option>
-                                                        <option value="Tajikistan">Tajikistan</option>
-                                                        <option value="Tanzania, United Republic of">Tanzania, United Republic of</option>
-                                                        <option value="Thailand">Thailand</option>
-                                                        <option value="Togo">Togo</option>
-                                                        <option value="Tokelau">Tokelau</option>
-                                                        <option value="Tonga">Tonga</option>
-                                                        <option value="Trinidad and Tobago">Trinidad and Tobago</option>
-                                                        <option value="Tunisia">Tunisia</option>
-                                                        <option value="Turkey">Turkey</option>
-                                                        <option value="Turkmenistan">Turkmenistan</option>
-                                                        <option value="Turks and Caicos Islands">Turks and Caicos Islands</option>
-                                                        <option value="Tuvalu">Tuvalu</option>
-                                                        <option value="Uganda">Uganda</option>
-                                                        <option value="Ukraine">Ukraine</option>
-                                                        <option value="United Arab Emirates">United Arab Emirates</option>
-                                                        <option value="United Kingdom">United Kingdom</option>
-                                                        <option value="United States">United States</option>
-                                                        <option value="United States Minor Outlying Islands">United States Minor Outlying Islands</option>
-                                                        <option value="Uruguay">Uruguay</option>
-                                                        <option value="Uzbekistan">Uzbekistan</option>
-                                                        <option value="Vanuatu">Vanuatu</option>
-                                                        <option value="Venezuela">Venezuela</option>
-                                                        <option value="Vietnam">Vietnam</option>
-                                                        <option value="Virgin Islands (British)">Virgin Islands (British)</option>
-                                                        <option value="Virgin Islands (U.S.)">Virgin Islands (U.S.)</option>
-                                                        <option value="Wallis and Futuna Islands">Wallis and Futuna Islands</option>
-                                                        <option value="Western Sahara">Western Sahara</option>
-                                                        <option value="Yemen">Yemen</option>
-                                                        <option value="Yugoslavia">Yugoslavia</option>
-                                                        <option value="Zambia">Zambia</option>
-                                                        <option value="Zimbabwe">Zimbabwe</option>
-                                                    </select>
-                                                    
-            
-                    
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-6">
-                <div class="input-item input-with-label">
-                    <label for="state" class="input-item-label">State <span class="text-require text-danger">*</span></label>
-                    <div class="input-wrap">
-                        <input required="" class="input-borderd form-control" type="text" value="" id="state" name="state" aria-required="true">
-                    </div>
-                </div>
-            </div>
-                 
-            <div class="col-md-6">
-                <div class="input-item input-with-label">
-                    <label for="city" class="input-item-label">City <span class="text-require text-danger">*</span></label>
-                    <div class="input-wrap">
-                        <input required="" class="input-bordered form-control" type="text" value="" id="city" name="city" aria-required="true">
-                    </div>
-                </div>
-            </div>
-              
-            <div class="col-md-6">
-                <div class="input-item input-with-label">
-                    <label for="zip" class="input-item-label">Zip / Postal Code <span class="text-require text-danger">*</span></label>
-                    <div class="input-wrap">
-                        <input required="" class="input-bordered form-control" type="text" value="" id="zip" name="zip" aria-required="true">
-                    </div>
-                </div>
-            </div>
-            
+
+
+                        
             <div class="col-md-6">
                 <div class="input-item input-with-label">
                     <label for="address_1" class="input-item-label">Address Line 1 <span class="text-require text-danger">*</span></label>
                     <div class="input-wrap">
-                        <input required="" class="input-bordered form-control" type="text" value="" id="address_1" name="address1" aria-required="true">
+                        <input required="" class="input-bordered form-control" type="text" value="{{ old('address1',  isset($kyc->address1) ? $kyc->address1 : null) }}" id="address_1" name="address1" aria-required="true">
+                        @if ($errors->has('address1'))
+                        <span class="invalid feedback text-danger"role="alert">
+                            <strong>{{ $errors->first('address1') }}.</strong>
+                        </span>
+                       @endif 
                     </div>
                 </div>
             </div>
@@ -592,10 +387,85 @@
                 <div class="input-item input-with-label">
                     <label for="address_2" class="input-item-label">Address Line 2 </label>
                     <div class="input-wrap">
-                        <input class="input-bordered form-control" type="text" value="" id="address_2" name="address2">
+                        <input class="input-bordered form-control" type="text" value="{{ old('address2',  isset($kyc->address2) ? $kyc->address2 : null) }}" id="address_2" name="address2">
+                        @if ($errors->has('address2'))
+                        <span class="invalid feedback text-danger"role="alert">
+                            <strong>{{ $errors->first('address2') }}.</strong>
+                        </span>
+                       @endif 
                     </div>
                 </div>
             </div>
+
+              
+            <div class="col-md-6">
+                <div class="input-item input-with-label">
+                    <label for="city" class="input-item-label">City <span class="text-require text-danger">*</span></label>
+                    <div class="input-wrap">
+                        <input required="" class="input-bordered form-control" type="text" value="{{ old('city',  isset($kyc->city) ? $kyc->city : null) }}" id="city" name="city" aria-required="true">
+                       
+                        @if ($errors->has('city'))
+                        <span class="invalid feedback text-danger"role="alert">
+                            <strong>{{ $errors->first('city') }}.</strong>
+                        </span>
+                       @endif 
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="input-item input-with-label">
+                    <label for="state" class="input-item-label">State <span class="text-require text-danger">*</span></label>
+                    <div class="input-wrap">
+                        <input required="" class="input-borderd form-control" type="text" value="{{ old('state',  isset($kyc->state) ? $kyc->state : null) }}" id="state" name="state" aria-required="true">
+                        
+                        @if ($errors->has('state'))
+                        <span class="invalid feedback text-danger"role="alert">
+                            <strong>{{ $errors->first('state') }}.</strong>
+                        </span>
+                       @endif 
+
+                    </div>
+                </div>
+            </div>
+               
+
+                        <div class="col-md-6">
+                <div class="input-item input-with-label">
+                    <label for="country" class="input-item-label">Country <span class="text-require text-danger">*</span></label>
+                    <div class="input-wrap">
+                        
+                  <input required="" class="input-borderd form-control" type="text" value="{{ Auth::user()->country }}" id="country" name="country" aria-required="true">
+                
+                  @if ($errors->has('country'))
+                  <span class="invalid feedback text-danger"role="alert">
+                      <strong>{{ $errors->first('country') }}.</strong>
+                  </span>
+                 @endif                               
+            
+                    
+                    </div>
+                </div>
+            </div>
+            
+            
+              
+            <div class="col-md-6">
+                <div class="input-item input-with-label">
+                    <label for="zip" class="input-item-label">Zip / Postal Code <span class="text-require text-danger">*</span></label>
+                    <div class="input-wrap">
+                        <input required="" class="input-bordered form-control" type="text" value="{{ old('zipcode',  isset($kyc->zipcode) ? $kyc->zipcode : null) }}" id="zip" name="zipcode" aria-required="true">
+                        
+                        @if ($errors->has('zipcode'))
+                        <span class="invalid feedback text-danger"role="alert">
+                            <strong>{{ $errors->first('zipcode') }}.</strong>
+                        </span>
+                       @endif 
+
+                    </div>
+                </div>
+            </div>
+            
                     </div>
 
 
@@ -634,9 +504,16 @@
                     <div class="note note-md note-info note-plane">
                         
                         <p> <em class="fa fa-info-circle"></em> {{ ('Please upload any one of the following personal document (image or pdf file only).') }}</p>
-                        @if($errors->has('document_type'))
+                       
+                        @if ($errors->has('document_type'))
+                        <span class="invalid feedback text-danger"role="alert">
+                            <strong>{{ $errors->first('document_type') }}.</strong>
+                        </span>
+                       @endif 
+
+                        {{-- @if($errors->has('document_type'))
                             <span style="color:RED;" class="err_msg"><small>{{ ($errors->first('document_type')) }}</small></span>
-                        @endif
+                        @endif --}}
                     </div>
                     <div class="gaps-2x"></div>
                     <ul class="nav nav-tabs nav-tabs-bordered" role="tablist" id="document_tab">
@@ -667,6 +544,8 @@
                                 <span>{{ ('Driver’s License') }}</span>
                             </a>
                         </li>
+
+                        
                     </ul><!-- .nav-tabs-line -->
                     <div class="tab-content" id="myTabContent">
                         <div class="tab-pane fade <?php if(isset($old_doc_type)){ if($old_doc_type=='passport'){  echo 'show active'; }else{ echo ''; } }else{ if(isset($kyc) && !empty($kyc) && $kyc->document_type=='passport'){ echo 'show active'; }else{ echo ''; } } if($active_tab=='passport'){ echo 'show active'; }?>" id="passport">
@@ -689,22 +568,22 @@
                                             </div>
                                         </div>
                                     </div>
-                                    @if($errors->has('document_id_passport'))
-                                        <span style="color:RED;" class="err_msg"><small>{{ ($errors->first('document_id_passport')) }}</small></span>
+                                    @if($errors->has('document_passport'))
+                                        <span style="color:RED;" class="err_msg"><small>{{ ($errors->first('document_passport')) }}</small></span>
                                     @endif
                                 </div>
                                 <div class="col-4">
                                     <div class="kyc-upload-img">
                                         <?php 
-                                        if(!empty(old('document_id_passport'))){
+                                        if(!empty(old('document_passport'))){
                                         ?>
-                                        <button class="btn btn-primary" type="button" onclick="window.open('<?php echo get_recource_url(old('document_id_passport')); ?>');">{{ ('View') }}</button>
+                                        <button class="btn btn-primary" type="button" onclick="window.open('<?php echo get_recource_url(old('document_passport')); ?>');">{{ ('View') }}</button>
                                         
                                         
                                         <?php
-                                        }else if(isset($kyc) && !empty($kyc) && $kyc->document_type=='passport' && $kyc->document_upload_id > 0){
+                                        }else if(isset($kyc) && !empty($kyc) && $kyc->document_type=='passport' && $kyc->document_passport > 0){
                                         ?>
-                                        <button class="btn btn-primary" type="button" onclick="window.open('<?php echo get_recource_url($kyc->document_upload_id); ?>');">{{ ('View') }}</button>
+                                        <button class="btn btn-primary" type="button" onclick="window.open('<?php echo get_recource_url($kyc->document_passport); ?>');">{{ ('View') }}</button>
                                         
                                         <!--<image src="{{ asset('kycdoc/$kyc->name') }}" width="200px" height="200px" alt="s">-->
                                         
@@ -741,20 +620,20 @@
                                             </div>
                                         </div>
                                     </div>
-                                    @if($errors->has('document_id_national-card_1'))
-                                        <span style="color:RED;" class="err_msg"><small>{{ ($errors->first('document_id_national-card_1')) }}</small></span>
+                                    @if($errors->has('document_id_national_card_1'))
+                                        <span style="color:RED;" class="err_msg"><small>{{ ($errors->first('document_id_national_card_1')) }}</small></span>
                                     @endif
                                 </div>
                                 <div class="col-4">
                                     <div class="kyc-upload-img">
                                         <?php 
-                                        if(!empty(old('document_id_national-card_1'))){
+                                        if(!empty(old('document_id_national_card_1'))){
                                         ?>
-                                        <button class="btn btn-primary" type="button" onclick="window.open('<?php echo get_recource_url(old('document_id_national-card_1')); ?>');">{{ ('View') }}</button>
+                                        <button class="btn btn-primary" type="button" onclick="window.open('<?php echo get_recource_url(old('document_id_national_card_1')); ?>');">{{ ('View') }}</button>
                                         <?php
-                                        }else if(isset($kyc) && !empty($kyc) && $kyc->document_type=='national-card' && $kyc->document_upload_id > 0){
+                                        }else if(isset($kyc) && !empty($kyc) && $kyc->document_type=='national-card' && $kyc->document_nidf > 0){
                                         ?>
-                                        <button class="btn btn-primary" type="button" onclick="window.open('<?php echo get_recource_url($kyc->document_upload_id); ?>');">{{ ('View') }}</button>
+                                        <button class="btn btn-primary" type="button" onclick="window.open('<?php echo get_recource_url($kyc->document_nidf); ?>');">{{ ('View') }}</button>
                                         <?php
                                         }else{ 
                                         ?>
@@ -778,20 +657,20 @@
                                             </div>
                                         </div>
                                     </div>
-                                    @if($errors->has('document_id_national-card_2'))
-                                        <span style="color:RED;" class="err_msg"><small>{{ ($errors->first('document_id_national-card_2')) }}</small></span>
+                                    @if($errors->has('document_id_national_card_2'))
+                                        <span style="color:RED;" class="err_msg"><small>{{ ($errors->first('document_id_national_card_2')) }}</small></span>
                                     @endif
                                 </div>
                                 <div class="col-4">
                                     <div class="kyc-upload-img">
                                         <?php 
-                                        if(!empty(old('document_id_national-card_2'))){
+                                        if(!empty(old('document_id_national_card_2'))){
                                         ?>
-                                        <button class="btn btn-primary" type="button" onclick="window.open('<?php echo get_recource_url(old('document_id_national-card_2')); ?>');">{{ ('View') }}</button>
+                                        <button class="btn btn-primary" type="button" onclick="window.open('<?php echo get_recource_url(old('document_id_national_card_2')); ?>');">{{ ('View') }}</button>
                                         <?php
-                                        }else if(isset($kyc) && !empty($kyc) && $kyc->document_type=='national-card' && $kyc->document_upload_id_2 > 0){
+                                        }else if(isset($kyc) && !empty($kyc) && $kyc->document_type=='national-card' && $kyc->document_nidb > 0){
                                         ?>
-                                        <button class="btn btn-primary" type="button" onclick="window.open('<?php echo get_recource_url($kyc->document_upload_id_2); ?>');">{{ ('View') }}</button>
+                                        <button class="btn btn-primary" type="button" onclick="window.open('<?php echo get_recource_url($kyc->document_nidb); ?>');">{{ ('View') }}</button>
                                         <?php
                                         }else{ 
                                         ?>
@@ -824,20 +703,20 @@
                                             </div>
                                         </div>
                                     </div>
-                                    @if($errors->has('document_id_driver-licence'))
-                                        <span style="color:RED;" class="err_msg"><small>{{ ($errors->first('document_id_driver-licence')) }}</small></span>
+                                    @if($errors->has('document_driving'))
+                                        <span style="color:RED;" class="err_msg"><small>{{ ($errors->first('document_driving')) }}</small></span>
                                     @endif
                                 </div>
                                 <div class="col-4">
                                     <div class="kyc-upload-img">
                                         <?php 
-                                        if(!empty(old('document_id_driver-licence'))){
+                                        if(!empty(old('document_driving'))){
                                         ?>
-                                        <button class="btn btn-primary" type="button" onclick="window.open('<?php echo get_recource_url(old('document_id_driver-licence')); ?>');">{{ ('View') }}</button>
+                                        <button class="btn btn-primary" type="button" onclick="window.open('<?php echo get_recource_url(old('document_driving')); ?>');">{{ ('View') }}</button>
                                         <?php
-                                        }else if(isset($kyc) && !empty($kyc) && $kyc->document_type=='driver-licence' && $kyc->document_upload_id > 0){
+                                        }else if(isset($kyc) && !empty($kyc) && $kyc->document_type=='driver-licence' && $kyc->document_driving > 0){
                                         ?>
-                                        <button class="btn btn-primary" type="button" onclick="window.open('<?php echo get_recource_url($kyc->document_upload_id); ?>');">{{ ('View') }}</button>
+                                        <button class="btn btn-primary" type="button" onclick="window.open('<?php echo get_recource_url($kyc->document_driving); ?>');">{{ ('View') }}</button>
                                         <?php
                                         }else{ 
                                         ?>
@@ -860,18 +739,25 @@
                                 <a href="#" style="color: #F44336;" target="_blank">{{ ('Privacy Policy') }}</a> {{ ('and') }}
                                  <a href="#" target="_blank" style="color: #F44336;">{{ ('Terms & Conditions') }}</a>
                                 </label>
+
                       </div>
-                       @if($errors->has('aggrement'))
-                      <span style="color:RED;" class="err_msg"><small>{{ ($errors->first('aggrement')) }}</small></span>
-                      <div style="clear:both;"></div>
-                      @endif
+
+                      @if ($errors->has('aggrement'))
+                      <span class="invalid feedback text-danger"role="alert">
+                          <strong>{{ $errors->first('aggrement') }}.</strong>
+                      </span>
+                     @endif
+
+                      
+
+
                         <div class="gaps-1x"></div>
                         <input name="document_type" type="hidden" id="document_type" value="<?php if(isset($old_doc_type)){ if(!empty($old_doc_type)){  echo $old_doc_type; }else{ echo $active_tab; } }else{ if(isset($kyc) && !empty($kyc)){ echo $kyc->document_type; }else{ echo $active_tab; } } ?>">
                         
-                        <input name="document_id_passport" type="hidden" id="document_id_passport" value="<?php if(isset($kyc) && !empty($kyc) && $kyc->document_type=='passport'){ echo $kyc->document_upload_id; }else{ if(!empty(old('document_id_passport'))){ echo old('document_id_passport'); }else{ echo 0; } } ?>">
-                        <input name="document_id_national-card_1" type="hidden" id="document_id_national-card_1" value="<?php if(isset($kyc) && !empty($kyc) && $kyc->document_type=='national-card'){ echo $kyc->document_upload_id; }else{ if(!empty(old('document_id_national-card_1'))){ echo old('document_id_national-card_1'); }else{ echo 0; } } ?>">
-                        <input name="document_id_national-card_2" type="hidden" id="document_id_national-card_2" value="<?php if(isset($kyc) && !empty($kyc) && $kyc->document_type=='national-card'){ echo $kyc->document_upload_id_2; }else{ if(!empty(old('document_id_national-card_2'))){ echo old('document_id_national-card_2'); }else{ echo 0; } } ?>">
-                        <input name="document_id_driver-licence" type="hidden" id="document_id_driver-licence" value="<?php if(isset($kyc) && !empty($kyc) && $kyc->document_type=='driver-licence'){ echo $kyc->document_upload_id; }else{ if(!empty(old('document_id_driver-licence'))){ echo old('document_id_driver-licence'); }else{ echo 0; } } ?>">
+                        <input name="document_passport" type="hidden" id="document_passport" value="<?php if(isset($kyc) && !empty($kyc) && $kyc->document_type=='passport'){ echo $kyc->document_passport; }else{ if(!empty(old('document_passport'))){ echo old('document_passport'); }else{ echo 0; } } ?>">
+                        <input name="document_id_national_card_1" type="hidden" id="document_id_national_card_1" value="<?php if(isset($kyc) && !empty($kyc) && $kyc->document_type=='national-card'){ echo $kyc->document_nidf; }else{ if(!empty(old('document_id_national_card_1'))){ echo old('document_id_national_card_1'); }else{ echo 0; } } ?>">
+                        <input name="document_id_national_card_2" type="hidden" id="document_id_national_card_2" value="<?php if(isset($kyc) && !empty($kyc) && $kyc->document_type=='national-card'){ echo $kyc->document_nidb; }else{ if(!empty(old('document_id_national_card_2'))){ echo old('document_id_national_card_2'); }else{ echo 0; } } ?>">
+                        <input name="document_driving" type="hidden" id="document_driving" value="<?php if(isset($kyc) && !empty($kyc) && $kyc->document_type=='driver-licence'){ echo $kyc->document_driving; }else{ if(!empty(old('document_driving'))){ echo old('document_driving'); }else{ echo 0; } } ?>">
                         
                         
                         <input type="hidden" name="kyc_id" id="kyc_id" value="<?php if(isset($kyc) && !empty($kyc) && ($kyc->status==0)){ echo $kyc->id; }else{ echo 0; } ?>">
@@ -880,11 +766,39 @@
                 </div><!-- .from-step-content -->
 
 
+                
+    
+    
+<div class="modal fade" id="kycConfirm" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="kyc-popup">
+                <h2 class="text-center">Confirm Information</h2>
+                <?php /*
+                <div class="input-item">
+                    <!--input class="input-checkbox" id="term-condition" type="checkbox"-->
+                    <label for="term-condition">I have read the <a href="<?php echo get_recource_url($terms_conditions); ?>" target="_blank">Terms of Condition</a> and <a href="<?php echo get_recource_url($privacy_policy); ?>" target="_blank">Privacy Policy.</a></label>
+                </div>
+                */ ?>
+                <div class="input-item">
+                    <!--input class="input-checkbox" id="info-currect" type="checkbox"-->
+                   <div class="text-center"> <label for="info-currect">Recheck the information you have entered</label></div>
+                </div>
+                <div class="gaps-2x"></div>
+                <div class="text-center">
+                <a href="javascript:void(0)" onclick="jQuery('#submit_application').submit();" class="btn btn-primary">{{ ('Confirm') }}</a>
+                <a href="javascript:void(0)" onclick="jQuery('#kycConfirm').modal('hide');" class="btn btn-primary">{{ ('Cancel') }}</a></div>
+            </div><!-- .modal-content -->
+        </div><!-- .modal-content -->
+    </div><!-- .modal-dialog -->
+</div><!-- Modal End -->
+
+
 
             </div>
 
 
-
+        </form>
 
            </div>
 
@@ -894,5 +808,108 @@
     </div>
 
 </div>
+    
+@endsection
+
+@section('js')
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/6.0.0-beta.2/dropzone-min.js" ></script>
+
+
+
+<script>
+ 
+ var CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+
+    Dropzone.autoDiscover = false;
+       (function($){
+         
+       var currentTabId = $('ul#document_tab li a.active').attr("data-id");	
+       jQuery('#document_type').val(currentTabId);
+       
+       $(".nav-link").click(function(){
+           currentTabId = $(this).attr("data-id");
+           jQuery('#document_type').val(currentTabId);
+       })
+       
+       
+         // Dropzone
+       var $upload_zone = $('.upload-zone');
+       if ($upload_zone.length > 0 ) {
+   
+           $upload_zone.each(function(){
+               var $self = $(this);
+               $self.addClass('dropzone').dropzone({
+                    url: "{{ route('add-kyc-document')}}",
+                //    /*autoProcessQueue: false,*/
+                   maxFiles: 1,
+                   acceptedFiles:'image/*,application/pdf',
+                   maxfilesexceeded: function(file) {
+                       this.removeAllFiles();
+                       this.addFile(file);
+                   },
+                   sending: function(file, xhr, formData) {
+                       formData.append("_token", CSRF_TOKEN);
+                       formData.append("document_type", currentTabId);
+                       if(currentTabId=='national-card' && $self.attr('id')=='youNid'){
+                           formData.append("document_order", "3");
+                       }else if(currentTabId=='national-card' && $self.attr('id')=='backside'){
+                           formData.append("document_order", "2");
+                       }else{
+                           formData.append("document_order", "1");
+                       }
+                        $('.kyc_submit').css("opacity", "0.5");
+                        $('.kyc_submit').text('Uploading...');
+                       $('.kyc_submit').prop('disabled', true);
+                   },
+                   success: function(file, response){
+                       var obj = JSON.parse(response);
+                       console.log(obj);
+                       if(obj.status=='success'){
+                           if(obj.document_type=='passport'){
+                               jQuery("#document_passport").val(obj.upload_id);
+                           }
+                           if(obj.document_type=='driver-licence'){
+                               jQuery("#document_driving").val(obj.upload_id);
+                           }
+                           if(obj.document_type=='national-card'){
+                               if(obj.document_order=='1'){
+                                   jQuery("#document_id_national_card_1").val(obj.upload_id);
+                               }else if(obj.document_order=='2'){
+                                   jQuery("#document_id_national_card_2").val(obj.upload_id);
+                               }else{
+                               jQuery("#document_id_national-card_3").val(obj.upload_id);
+                               }
+                           }
+                           
+                           
+                           if(obj.document_type=='national-card' && jQuery("#document_id_national_card_2").val() =="" ){
+                               $('.kyc_submit').css("opacity", "0.5");
+                               $('.kyc_submit').text('Uploading...');
+                               $('.kyc_submit').prop('disabled', true);
+                           }else{
+                               $('.kyc_submit').css("opacity", "1");
+                               $('.kyc_submit').text('Submit Details');
+                               $('.kyc_submit').prop('disabled', false);
+
+                           }
+                           
+                       }
+                   },
+                   error: function(file, message, xhr) {
+                      if (xhr == null) this.removeFile(file); // perhaps not remove on xhr errors
+                      alert(message);
+                   }
+               });
+           });
+       }
+       
+       
+       
+       
+       
+       })(jQuery);
+    
+    </script>
     
 @endsection
