@@ -315,6 +315,12 @@ class KycController extends Controller
 		}
 	}
 
+	public function kyclist()
+	{
+		$kyc = Kyc::all();
+		return view('backend.kyc.approved',compact('kyc'));
+	}
+
 
 	
 

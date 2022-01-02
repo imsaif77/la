@@ -26,6 +26,12 @@
 						</a>
 					</li>
 
+					<li><a href="{{route('kyc')}}" class="ai-icon" aria-expanded="false">
+						<i class="flaticon-381-settings-2"></i>
+						<span class="nav-text">Kyc Application</span>
+					</a>
+				</li>
+
 					<hr>
 
 					@role('Admin')

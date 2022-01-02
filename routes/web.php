@@ -74,6 +74,9 @@ Route::group(['middleware' => ['auth','verified']], function() {
 
     Route::get('getimage/{ID?}',[KycController::class, 'getimage'])->name('getimage');
 
+
+    Route::get('kyclist',[KycController::class, 'kyclist'])->name('kyclist');
+
     
 
 
